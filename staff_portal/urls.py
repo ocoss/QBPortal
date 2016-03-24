@@ -1,8 +1,9 @@
 from django.conf.urls import url
 
-from staff_portal.views import StaffOrdersView, StaffReportsView
+from staff_portal.views import StaffOrdersView, StaffReportsView, StaffSettingsView
 
 urlpatterns = [
-    url(r'^$', StaffOrdersView.as_view(), name='orders'),
-    url(r'^reports/$', StaffReportsView.as_view(), name='reports'),
+    url(r'^$', StaffOrdersView.as_view(), name='staff_orders'),
+    url(r'^reports/$', StaffReportsView.as_view(), name='staff_reports'),
+    url(r'^settings/$', StaffSettingsView.as_view(), name='staff_settings'),
 ]

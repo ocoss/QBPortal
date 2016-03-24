@@ -35,3 +35,12 @@ class Profile(models.Model):
 
     rep = models.ForeignKey(StaffMember, verbose_name="323 Sports Representative",
                                on_delete=models.SET_NULL, null=True)
+
+    def __unicode__(self):
+        return "{} {}".format(self.user.first_name, self.user.last_name)
+    
+    def __str__(self):
+        return "{} {}".format(self.user.first_name, self.user.last_name)
+        
+    class Meta():
+        ordering = ['user__last_name', 'user__first_name']

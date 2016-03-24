@@ -18,8 +18,11 @@ from django.conf.urls import url, include
 from django.contrib import admin
 
 urlpatterns = [
+    url(r'^login/$', 'django.contrib.auth.views.login'),
+
     url(r'', include('client_portal.urls')),
     url(r'staff/', include('staff_portal.urls')),
     #url(r'', include('tools.urls')),
+    
     url(r'^admin/', admin.site.urls),
 ]
