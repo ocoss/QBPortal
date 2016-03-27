@@ -1,21 +1,17 @@
-from django.http import HttpResponseRedirect
-from django.views import generic
-from django.shortcuts import render, get_object_or_404
-from django.core.urlresolvers import reverse
+from django.shortcuts import render, get_object_or_404, redirect
 
-from django.utils.decorators import method_decorator
-from django.contrib.auth.decorators import login_required
+from django.views.generic import TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 
-class StaffOrdersView(generic.TemplateView):
+class StaffOrdersView(LoginRequiredMixin, TemplateView):
     template_name = 'staff_portal/staff_orders.html'
     
     def get_context_data(self, **kwargs):
         context = super(StaffOrdersView, self).get_context_data(**kwargs)
         return context
 
-    @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         # redirect to client page if not staff member
         if not hasattr(request.user, 'staffmember'):
@@ -24,14 +20,13 @@ class StaffOrdersView(generic.TemplateView):
 
 
 
-class StaffReportsView(generic.TemplateView):
+class StaffReportsView(LoginRequiredMixin, TemplateView):
     template_name = 'staff_portal/staff_reports.html'
     
     def get_context_data(self, **kwargs):
         context = super(StaffReportsView, self).get_context_data(**kwargs)
         return context
 
-    @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         # redirect to client page if not staff member
         if not hasattr(request.user, 'staffmember'):
@@ -40,14 +35,13 @@ class StaffReportsView(generic.TemplateView):
 
 
 
-class StaffSettingsView(generic.TemplateView):
+class StaffSettingsView(LoginRequiredMixin, TemplateView):
     template_name = 'staff_portal/staff_settings.html'
     
     def get_context_data(self, **kwargs):
         context = super(StaffSettingsView, self).get_context_data(**kwargs)
         return context
 
-    @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         # redirect to client page if not staff member
         if not hasattr(request.user, 'staffmember'):

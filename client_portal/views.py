@@ -1,16 +1,15 @@
 from django.conf import settings
-from django.views import generic
 from django.shortcuts import render, get_object_or_404, redirect
 
-from django.utils.decorators import method_decorator
-from django.contrib.auth.decorators import login_required
+from django.views.generic import TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from quickbooks import QuickBooks
 from quickbooks.objects.customer import Customer
 
 
 
-class OrdersView(generic.TemplateView):
+class OrdersView(LoginRequiredMixin, TemplateView):
     template_name = 'client_portal/orders.html'
     
     def get_context_data(self, **kwargs):
@@ -31,7 +30,6 @@ class OrdersView(generic.TemplateView):
 
         return context
 
-    @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         # redirect to staff page if staff member
         if hasattr(request.user, 'staffmember'):
@@ -40,14 +38,13 @@ class OrdersView(generic.TemplateView):
 
 
 
-class ReportsView(generic.TemplateView):
+class ReportsView(LoginRequiredMixin, TemplateView):
     template_name = 'client_portal/reports.html'
     
     def get_context_data(self, **kwargs):
         context = super(ReportsView, self).get_context_data(**kwargs)
         return context
 
-    @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         # redirect to staff page if staff member
         if hasattr(request.user, 'staffmember'):
@@ -56,16 +53,26 @@ class ReportsView(generic.TemplateView):
 
 
 
-class SettingsView(generic.TemplateView):
+class SettingsView(LoginRequiredMixin, TemplateView):
     template_name = 'client_portal/settings.html'
     
     def get_context_data(self, **kwargs):
         context = super(SettingsView, self).get_context_data(**kwargs)
         return context
 
-    @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         # redirect to staff page if staff member
         if hasattr(request.user, 'staffmember'):
             return redirect('staff_settings')
         return super(SettingsView, self).dispatch(request, *args, **kwargs)
+
+
+
+class NewAccountView(TemplateView):
+    template_name = 'client_portal/create_account.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        # check if already logged in
+        if request.user.is_authenticated():
+            return redirect('orders')
+        return super(NewAccountView, self).dispatch(request, *args, **kwargs)
