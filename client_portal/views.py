@@ -4,6 +4,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
+from client_portal.forms import NewAccountForm
+
 from quickbooks import QuickBooks
 from quickbooks.objects.customer import Customer
 
@@ -70,6 +72,11 @@ class SettingsView(LoginRequiredMixin, TemplateView):
 
 class NewAccountView(TemplateView):
     template_name = 'client_portal/create_account.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(NewAccountView, self).get_context_data(**kwargs)
+        context['form'] = NewAccountForm()
+        return context
 
     def dispatch(self, request, *args, **kwargs):
         # check if already logged in

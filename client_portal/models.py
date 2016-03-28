@@ -36,6 +36,8 @@ class Profile(models.Model):
     rep = models.ForeignKey(StaffMember, verbose_name="323 Sports Representative",
                                on_delete=models.SET_NULL, null=True)
 
+    email_verified = models.BooleanField(default=False)
+
     def __unicode__(self):
         return "{} {}".format(self.user.first_name, self.user.last_name)
     
