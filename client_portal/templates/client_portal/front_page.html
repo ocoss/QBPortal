@@ -1,0 +1,17 @@
+{% extends "client_portal/base.html" %}
+
+{% block title %}
+front page
+{% endblock %}
+
+{% block style %}
+    body{
+        background-color: #FFFF55;
+    }
+{% endblock %}
+
+{%block body %}
+    <h1>Front Page</h1>
+    <p><a href='/login?next=/orders'>Login</a> or <a href={% url 'create_account' %}>create new account</a>.</p>
+
+{% endblock %}

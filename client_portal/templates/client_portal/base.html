@@ -11,6 +11,13 @@
     </style>
 </head>
 <body>
+    {% block nav_bar %}
+    <a href={% url 'front_page' %}>front page</a>
+    <a href={% url 'orders' %}>orders</a>
+    <a href={% url 'reports' %}>reports</a>
+    <a href={% url 'settings' %}>settings</a>
+    <a href={% url 'logout' %}>logout</a>
+    {% endblock %}
     {% block body %}
     {% endblock %}
 </body>

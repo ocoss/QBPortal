@@ -11,6 +11,11 @@ from quickbooks.objects.customer import Customer
 
 
 
+class FrontPageView(TemplateView):
+    template_name = 'client_portal/front_page.html'
+
+
+
 class OrdersView(LoginRequiredMixin, TemplateView):
     template_name = 'client_portal/orders.html'
     
@@ -78,8 +83,17 @@ class NewAccountView(TemplateView):
         context['form'] = NewAccountForm()
         return context
 
+    def post(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        form = NewAccountForm(request.POST)
+        if form.is_valid(): 
+            return redirect('orders')
+        context['form'] = form
+        return render(request, self.template_name, context)
+
+
     def dispatch(self, request, *args, **kwargs):
         # check if already logged in
         if request.user.is_authenticated():
-            return redirect('orders')
+            return redirect('front_page')
         return super(NewAccountView, self).dispatch(request, *args, **kwargs)
