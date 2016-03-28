@@ -22,21 +22,25 @@ class NewAccountForm(forms.ModelForm):
         # Check if username exists
         try:
             User.objects.get(username=self.cleaned_data['username'])
-        except User.DoesNotExist :
+        except User.DoesNotExist:
             return self.cleaned_data['username']
 
         raise forms.ValidationError("Username is already in use.")
 
-    def clean(self):
+    def clean_password_1(self):
+        # make sure password is valid
+        if 'password_1' in self.cleaned_data:
+            validate_password(self.cleaned_data['password_1'])
+
+        return self.cleaned_data['password_1']
+
+    def clean_password_2(self):
         # check if password_1 and password_2 match each other
         if 'password_1' in self.cleaned_data and 'password_2' in self.cleaned_data:
             if self.cleaned_data['password_1'] != self.cleaned_data['password_2']:
                 raise forms.ValidationError("password_2 doesn't match password_1.")
 
-            # make sure password is valid
-            validate_password(self.cleaned_data['password_1'])
-
-        return self.cleaned_data
+        return self.cleaned_data['password_2']
 
     def save(self):
         # create new user
