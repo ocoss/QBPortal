@@ -92,7 +92,6 @@ class NewAccountView(TemplateView):
         context['form'] = form
         return render(request, self.template_name, context)
 
-
     def dispatch(self, request, *args, **kwargs):
         # check if already logged in
         if request.user.is_authenticated():

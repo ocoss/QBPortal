@@ -37,12 +37,14 @@ class Profile(models.Model):
                                on_delete=models.SET_NULL, null=True)
 
     email_verified = models.BooleanField(default=False)
+    # may want this field?
+    # rep_verified = models.BooleanField(defaul=False)
+        
+    class Meta():
+        ordering = ['user__last_name', 'user__first_name']
 
     def __unicode__(self):
         return "{} {}".format(self.user.first_name, self.user.last_name)
     
     def __str__(self):
         return "{} {}".format(self.user.first_name, self.user.last_name)
-        
-    class Meta():
-        ordering = ['user__last_name', 'user__first_name']

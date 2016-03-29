@@ -6,10 +6,14 @@ staff settings
 
 {% block style %}
     body{
-        background-color: #FF5555;
+        background-color: #BBBBBB;
     }
 {% endblock %}
 
-{%block body %}
-<h1>Staff Settings</h1>
+{% block body %}
+    <h1>Staff Settings</h1>
+
+    {% if request.user.is_superuser %}
+        <a href={% url 'create_staff' %}>Create new staff account</a>
+    {% endif %}
 {% endblock %}
