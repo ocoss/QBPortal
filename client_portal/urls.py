@@ -8,6 +8,4 @@ urlpatterns = [
     url(r'^reports/$', ReportsView.as_view(), name='reports'),
     url(r'^settings/$', SettingsView.as_view(), name='settings'),
     url(r'^create_account/$', NewAccountView.as_view(), name='create_account'),
-    url(r'^logout/$', 'django.contrib.auth.views.logout', name='logout', 
-        kwargs={'next_page':'/'}),
 ]

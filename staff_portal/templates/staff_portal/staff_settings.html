@@ -1,19 +1,10 @@
-{% extends "client_portal/base.html" %}
+{% extends "client_portal/base_settings.html" %}
 
-{% block title %}
-staff settings
+{% block page_title %}
+    <h1> Staff Settings </h1>
 {% endblock %}
-
-{% block style %}
-    body{
-        background-color: #BBBBBB;
-    }
-{% endblock %}
-
-{% block body %}
-    <h1>Staff Settings</h1>
-
-    {% if request.user.is_superuser %}
-        <a href={% url 'create_staff' %}>Create new staff account</a>
+{% block extra_settings %}
+    {% if user.is_superuser %}
+        <p><a href={% url 'create_staff' %}>Create new staff account</a></p>
     {% endif %}
 {% endblock %}

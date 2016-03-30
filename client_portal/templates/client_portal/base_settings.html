@@ -1,0 +1,23 @@
+{% extends "client_portal/base.html" %}
+
+{% block title %}
+settings
+{% endblock %}
+
+{% block style %}
+    body{
+        background-color: #FF5555;
+    }
+{% endblock %}
+
+{%block body %}
+    {% block page_title %}
+    <h1>Settings</h1>
+    {% endblock %}
+    {% block settings %}
+        <p><a href={% url 'change_password' %}>Change Password</a></p>
+    {% endblock %}
+    {% block extra_settings %}
+    {% endblock %}
+
+{% endblock %}

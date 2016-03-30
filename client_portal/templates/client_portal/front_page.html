@@ -13,6 +13,6 @@ front page
 {%block body %}
     <h1>Front Page</h1>
     {% if not request.user.is_authenticated %}
-    <p><a href='/login?next=/orders'>Login</a> or <a href={% url 'create_account' %}>create new account</a>.</p>
+    <p><a href={% url 'login' %}>Login</a> or <a href={% url 'create_account' %}>create new account</a>.</p>
     {% endif %}
 {% endblock %}
