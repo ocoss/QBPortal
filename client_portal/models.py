@@ -33,7 +33,8 @@ class Profile(models.Model):
 
     phone_number = models.CharField(max_length=20)
 
-    rep = models.ForeignKey(StaffMember, verbose_name="323 Sports Representative",
+    # probably make this a per order field
+    #rep = models.ForeignKey(StaffMember, verbose_name="323 Sports Representative",
                                on_delete=models.SET_NULL, null=True)
 
     email_verified = models.BooleanField(default=False)

@@ -1,13 +1,9 @@
-from django.conf import settings
 from django.shortcuts import render, get_object_or_404, redirect
 
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from client_portal.forms import NewAccountForm
-
-from quickbooks import QuickBooks
-from quickbooks.objects.customer import Customer
 
 
 
@@ -21,20 +17,6 @@ class OrdersView(LoginRequiredMixin, TemplateView):
     
     def get_context_data(self, **kwargs):
         context = super(OrdersView, self).get_context_data(**kwargs)
-
-        # setup API conection
-        # QB = settings.QUICKBOOKS
-        # quickbooks = QuickBooks(sandbox=True,
-        #                         consumer_key=QB['CLIENT_KEY'],
-        #                         consumer_secret=QB['CLIENT_SECRET'],
-        #                         access_token=QB['ACCESS_TOKEN'],
-        #                         access_token_secret=QB['ACCESS_TOKEN_SECRET'],
-        #                         company_id=QB['REALM_ID']
-        #                         )
-
-        # # query api
-        # context['customers'] = Customer.all()
-
         return context
 
     def dispatch(self, request, *args, **kwargs):
