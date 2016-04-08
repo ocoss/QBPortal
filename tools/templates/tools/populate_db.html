@@ -5,6 +5,33 @@ populate db
 {% endblock %}
 
 {%block body %}
-<h1>Populate DB</h1>
-<p>{{ customers }}</p>
+    <h1>Populate DB</h1>
+    <p>{{ data.CustomerRef }}</p>
+    <p>{{ data.ShipAddr }}</p>
+    <p>{{ data.CustomerMemo }}</p>
+    <p>{{ data.DeliveryInfo.DeliveryType }}</p>
+    <p>{{ data.DeliveryInfo.DeliveryTime }}</p>
+    <p>{{ data.Balance }}</p>
+    <p>{{ data.Deposit }}</p>
+    <p>{{ data.TotalAmt }}</p>
+    <p>{{ data.DepartmentRef }}</p>
+    <h3>Custom Fields</h3>
+        {% for cf in data.CustomField %}
+        <div>
+            <p>{{ cf.Name }}</p>
+            <p>{{ cf.Type }}</p>
+            <p>{{ cf.StringValue }}</p>
+        </div>
+        {% endfor %}
+    <h3>Detail Line</h3>
+        {% for dl in data.Line %}
+        <div>
+            <p>{{ dl.Id }}</p>
+            <p>{{ dl.LineNum }}</p>
+            <p>{{ dl.Description }}</p>
+            <p>{{ dl.Amount }}</p>
+            <p>{{ dl.DetailType }}</p>
+            <p>{{ dl.CustomField }}</p>
+        </div>
+        {% endfor %}
 {% endblock %}

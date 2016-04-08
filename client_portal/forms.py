@@ -7,16 +7,15 @@ from client_portal.models import Profile
 
 class NewAccountForm(forms.ModelForm):
     class Meta:
-        model = Profile
-        fields = ['street_address', 'city', 'state', 'zip_code', 'phone_number',
-                  'rep', ]
+        model  = Profile
+        fields = ['billing_address', 'city', 'state', 'zip_code', 'phone_number',]
 
-    username = forms.CharField(max_length=30)
+    username   = forms.CharField(max_length=30)
     password_1 = forms.CharField(max_length=30, widget=forms.PasswordInput())
     password_2 = forms.CharField(max_length=30, widget=forms.PasswordInput())
     first_name = forms.CharField()
-    last_name = forms.CharField()
-    email=forms.EmailField()
+    last_name  = forms.CharField()
+    email      = forms.EmailField()
 
     def clean_username(self):
         # Check if username exists
@@ -51,11 +50,10 @@ class NewAccountForm(forms.ModelForm):
         new_user.last_name = self.cleaned_data['last_name']
         new_user.save()
         profile = Profile(user=new_user,
-                          street_address=self.cleaned_data['street_address'],
+                          billing_address=self.cleaned_data['billing_address'],
                           city=self.cleaned_data['city'],
                           state=self.cleaned_data['state'],
                           zip_code=self.cleaned_data['zip_code'],
-                          phone_number=self.cleaned_data['phone_number'],
-                          rep=self.cleaned_data['rep'])
+                          phone_number=self.cleaned_data['phone_number'])
         profile.save()
         return profile

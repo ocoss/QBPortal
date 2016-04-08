@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
-from . import views
+from tools.views import PopulateDBView
 
 urlpatterns = [
-    url(r'^tools$', views.index, name='tools_index'),
+    url(r'^$', PopulateDBView.as_view(), name='populate_db'),
 ]
