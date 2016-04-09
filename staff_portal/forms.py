@@ -11,7 +11,7 @@ from client_portal.models import Profile
 class NewStaffForm(forms.ModelForm):
     class Meta:
         model = StaffMember
-        fields = []
+        fields = ['qb_code',]
 
     username = forms.CharField(max_length=30)
     password_1 = forms.CharField(max_length=30, widget=forms.PasswordInput())
@@ -53,6 +53,6 @@ class NewStaffForm(forms.ModelForm):
         new_user.last_name = self.cleaned_data['last_name']
         new_user.save()
         
-        staff = StaffMember(user=new_user)
+        staff = StaffMember(user=new_user, qb_code=self.cleaned_data['qb_code'])
         staff.save()
         return staff

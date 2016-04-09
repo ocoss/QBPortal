@@ -5,6 +5,7 @@ populate db
 {% endblock %}
 
 {%block body %}
+{% comment %}
     <h1>Populate DB</h1>
     <p>{{ data.CustomerRef }}</p>
     <p>{{ data.ShipAddr }}</p>
@@ -34,4 +35,7 @@ populate db
             <p>{{ dl.CustomField }}</p>
         </div>
         {% endfor %}
+{% endcomment %}
+    <h2>User info: {{ user_info }}</h2>
+
 {% endblock %}

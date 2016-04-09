@@ -30,30 +30,45 @@ class PopulateDBView(LoginRequiredMixin, TemplateView):
                                 )
 
         # get all info from api in lists of objects
-        invoices = Invoice.all(max_results=10)
+        invoices = Invoice.all(max_results=1000)
 
         # create orders from invoice info
         for invoice in invoices:
             # parse user info
-            user_info = invoice.CustomerRef.split()
-            # trim extra commas
-            if user_info[1].endswith(','):
-                user_info[1] = user_info[1][:-1]
-            if user_info[2].endswith(','):
-                user_info[2] = user_info[2][:-1]
-            
-            # try to find associated user profile
-            try:
-                profile = Profile.objects.get(user__first_name=user_info[0], user__last_name=user_info[1], city=user_info[2], state=user_info[3])
+            # should be {name/org}, {city}, {state (2 letter)}
+            # but some are missing second comma :(
+            user_info = invoice.CustomerRef.name.split(',')
 
-            # user does not have an online profile
+            # handle missing comma case
+            if len(user_info) == 2
+                city_state = user_info[1].strip()
+                user_info[1] = city_state[:-3].strip()
+                user_info.append(city_state[-2:])
+
+            # try to find associated user profile
+            name = user_info[0].split()
+            
+            if len(name) == 2:
+                # could be person's name
+                try:
+                    profile = Profile.objects.get(user__first_name=name[0].strip(), user__last_name=name[1].strip(), city=user_info[1].strip(), state=user_info[2].strip())
+
+                # user does not have an online profile
+                except ObjectDoesNotExist:
+                    pass
+
+            # could be org name
+            try:
+                profile = Profile.objects.get(org_name=user_info[0].strip(), city=user_info[1].strip(), state=user_info[2].strip())
+
+            # org does not have an online profile
             except ObjectDoesNotExist:
-                continue
+                profile = None
 
             # try to find associated rep
             for cf in invoice.CustomField:
                 if cf.Name == "SALES REP":
-                    rep_code = cf.StringValue
+                    rep_code = cf.StringValue.strip()
                     try:
                         rep = StaffMember.objects.get(qb_code=rep_code)
                     except ObjectDoesNotExist
@@ -63,13 +78,16 @@ class PopulateDBView(LoginRequiredMixin, TemplateView):
                 rep = None
             
 
+            # convert to custom django model
             order = Order(client=profile, rep=rep)
 
 
 
 
-        # convert to custom django models
-        context['data'] = invoices[0]
+
+
+
+
 
         return context
 
