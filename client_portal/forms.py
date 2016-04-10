@@ -1,4 +1,5 @@
 from django import forms
+from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 
@@ -8,7 +9,8 @@ from client_portal.models import Profile
 class NewAccountForm(forms.ModelForm):
     class Meta:
         model  = Profile
-        fields = ['billing_address', 'city', 'state', 'zip_code', 'phone_number',]
+        fields = ['organization', 'billing_address', 'city', 'state', 'zip_code',
+                  'phone_number',]
 
     username   = forms.CharField(max_length=30)
     password_1 = forms.CharField(max_length=30, widget=forms.PasswordInput())
@@ -50,10 +52,38 @@ class NewAccountForm(forms.ModelForm):
         new_user.last_name = self.cleaned_data['last_name']
         new_user.save()
         profile = Profile(user=new_user,
+                          organization=self.cleaned_data['organization'],
                           billing_address=self.cleaned_data['billing_address'],
                           city=self.cleaned_data['city'],
                           state=self.cleaned_data['state'],
                           zip_code=self.cleaned_data['zip_code'],
                           phone_number=self.cleaned_data['phone_number'])
+        profile.save()
+        return profile
+
+
+
+class UpdateAccountForm(forms.ModelForm):
+    class Meta:
+        model  = Profile
+        fields = ['organization', 'billing_address', 'city', 'state',
+                  'zip_code', 'phone_number', 'email_verified', 'rep_verified',]
+
+    def save(self, pk):
+        profile = get_object_or_404(Profile, pk=pk)
+        # get all the new invoices if newly approved
+        if not profile.rep_verified and self.cleaned_data['rep_verified']:
+            pass
+            # pull new stuff here
+
+        # update info
+        profile.organization = self.cleaned_data['organization']
+        profile.billing_address = self.cleaned_data['billing_address']
+        profile.city = self.cleaned_data['city']
+        profile.state = self.cleaned_data['state']
+        profile.zip_code = self.cleaned_data['zip_code']
+        profile.email_verified = self.cleaned_data['email_verified']
+        profile.rep_verified = self.cleaned_data['rep_verified']
+
         profile.save()
         return profile

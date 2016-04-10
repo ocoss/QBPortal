@@ -4,6 +4,8 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from staff_portal.forms import NewStaffForm
+from client_portal.forms import UpdateAccountForm
+from client_portal.models import Profile
 
 
 
@@ -42,6 +44,7 @@ class StaffSettingsView(LoginRequiredMixin, TemplateView):
     
     def get_context_data(self, **kwargs):
         context = super(StaffSettingsView, self).get_context_data(**kwargs)
+        context['clients'] = Profile.objects.all()
         return context
 
     def dispatch(self, request, *args, **kwargs):
@@ -49,6 +52,35 @@ class StaffSettingsView(LoginRequiredMixin, TemplateView):
         if not hasattr(request.user, 'staffmember'):
             return redirect('settings')
         return super(StaffSettingsView, self).dispatch(request, *args, **kwargs)
+
+
+
+class StaffUpdateView(LoginRequiredMixin, TemplateView):
+    template_name = 'staff_portal/staff_update_account.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(StaffUpdateView, self).get_context_data(**kwargs)
+        client_pk = self.kwargs['pk']
+        context['pk'] = client_pk
+        profile = get_object_or_404(Profile, pk=client_pk)
+        context['client'] = profile
+        context['form'] = UpdateAccountForm(instance=profile)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        form = UpdateAccountForm(request.POST)
+        if form.is_valid():
+            form.save(kwargs['pk'])
+            return redirect('staff_settings')
+        context['form'] = form
+        return render(request, self.template_name, context)
+
+    def dispatch(self, request, *args, **kwargs):
+        # redirect to client page if not staff member
+        if not hasattr(request.user, 'staffmember'):
+            return redirect('settings')
+        return super(StaffUpdateView, self).dispatch(request, *args, **kwargs)
 
 
 

@@ -76,6 +76,7 @@ class Profile(models.Model):
     # (* optional; Make required in forms)
     
     # additional info goes here
+    organization = models.CharField(max_length=200)
     billing_address = models.CharField(max_length=100)
     city = models.CharField(max_length=50)
     state = models.CharField(max_length=2, choices=STATE_ABREVIATIONS)
@@ -84,15 +85,18 @@ class Profile(models.Model):
     phone_number = models.CharField(max_length=20)
 
     email_verified = models.BooleanField(default=False)
-        
+    rep_verified = models.BooleanField(default=False)
+    
     class Meta():
         ordering = ['user__last_name', 'user__first_name']
 
     def __unicode__(self):
-        return "{} {}".format(self.user.first_name, self.user.last_name)
+        return "{} {}: {}".format(self.user.first_name, self.user.last_name,
+                                  self.organization)
     
     def __str__(self):
-        return "{} {}".format(self.user.first_name, self.user.last_name)
+        return "{} {}: {}".format(self.user.first_name, self.user.last_name,
+                                  self.organization)
 
 
 
@@ -118,7 +122,6 @@ class Order(models.Model):
     # if total_owed is zero
     payed_off = models.BooleanField(default=False)
     
-
     class Meta():
         ordering = ['date']
 

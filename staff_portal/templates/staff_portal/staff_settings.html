@@ -4,6 +4,18 @@
     <h1> Staff Settings </h1>
 {% endblock %}
 {% block extra_settings %}
+    
+    <h3>Clients (* is not verified)</h3>
+    {% for client in clients %}
+        <p>
+        {% if not client.rep_verified %}
+            (*)
+        {% endif %}
+            <a href={% url 'staff_update_account' pk=client.pk %}>{{ client }}</a>
+        </p>
+    {% endfor %}
+
+    <h3>Admin Settings</h3>
     {% if user.is_superuser %}
         <p><a href={% url 'create_staff' %}>Create new staff account</a></p>
     {% endif %}

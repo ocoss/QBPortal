@@ -40,7 +40,7 @@ class PopulateDBView(LoginRequiredMixin, TemplateView):
             user_info = invoice.CustomerRef.name.split(',')
 
             # handle missing comma case
-            if len(user_info) == 2
+            if len(user_info) == 2:
                 city_state = user_info[1].strip()
                 user_info[1] = city_state[:-3].strip()
                 user_info.append(city_state[-2:])
@@ -71,7 +71,7 @@ class PopulateDBView(LoginRequiredMixin, TemplateView):
                     rep_code = cf.StringValue.strip()
                     try:
                         rep = StaffMember.objects.get(qb_code=rep_code)
-                    except ObjectDoesNotExist
+                    except ObjectDoesNotExist:
                         rep = None
                     break
             else:
