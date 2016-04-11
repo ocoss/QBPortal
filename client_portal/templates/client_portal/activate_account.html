@@ -1,0 +1,21 @@
+{% extends "client_portal/base.html" %}
+
+{% block title %}
+activate account
+{% endblock %}
+
+{% block style %}
+    body{
+        background-color: #55FFFF;
+    }
+{% endblock %}
+
+{%block body %}
+<h1>Activate Account</h1>
+
+<form action={% url 'activate_account' %} method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Submit" />
+</form>
+{% endblock %}

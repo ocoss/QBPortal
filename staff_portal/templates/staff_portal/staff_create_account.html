@@ -1,0 +1,15 @@
+{% extends "client_portal/base.html" %}
+
+{% block title %}
+update account
+{% endblock %}
+
+{%block body %}
+<h1>Create Client Account</h1>
+
+<form action={% url 'staff_create_account' %} method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Save" />
+</form>
+{% endblock %}
