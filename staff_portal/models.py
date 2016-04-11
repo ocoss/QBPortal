@@ -5,8 +5,9 @@ from django.contrib.auth.models import User
 
 class StaffMember(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    qb_code = models.CharField(max_length=2)
-        
+    qb_code = models.CharField(max_length=10)
+
+
     class Meta():
         ordering = ['user__last_name', 'user__first_name']
 

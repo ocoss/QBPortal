@@ -1,23 +1,51 @@
 from django import forms
-from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 
 from client_portal.models import Profile
 
 
-class NewAccountForm(forms.ModelForm):
+class NewClientAccountForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['order_name',]
+
+    email = forms.EmailField()
+
+    def save(self):
+        # generate a random login
+        try:
+            while True:
+                username = User.objects.make_random_password(length=6)
+                User.objects.get(username=username)
+        except User.DoesNotExist:
+            pass
+
+        password = User.objects.make_random_password()
+
+        print("{} - {}".format(username, password))
+
+        # create a new, inactive user profile
+        new_user = User.objects.create_user(username)
+        new_user.email = self.cleaned_data['email']
+        new_user.set_password(password)
+        new_user.save()
+        
+        profile = Profile(user=new_user, activated=False,
+                          order_name=self.cleaned_data['order_name'])
+        profile.save()
+        return profile
+
+
+
+class ActivateAccountForm(forms.ModelForm):
     class Meta:
         model  = Profile
-        fields = ['organization', 'billing_address', 'city', 'state', 'zip_code',
-                  'phone_number',]
+        fields = []
 
-    username   = forms.CharField(max_length=30)
+    username = forms.CharField(max_length=30)
     password_1 = forms.CharField(max_length=30, widget=forms.PasswordInput())
     password_2 = forms.CharField(max_length=30, widget=forms.PasswordInput())
-    first_name = forms.CharField()
-    last_name  = forms.CharField()
-    email      = forms.EmailField()
 
     def clean_username(self):
         # Check if username exists
@@ -39,51 +67,18 @@ class NewAccountForm(forms.ModelForm):
         # check if password_1 and password_2 match each other
         if 'password_1' in self.cleaned_data and 'password_2' in self.cleaned_data:
             if self.cleaned_data['password_1'] != self.cleaned_data['password_2']:
-                raise forms.ValidationError("password_2 doesn't match password_1.")
+                raise forms.ValidationError("password 2 doesn't match password 1.")
 
         return self.cleaned_data['password_2']
 
-    def save(self):
-        # create new user
-        new_user = User.objects.create_user(self.cleaned_data['username'],
-                                            self.cleaned_data['email'],
-                                            self.cleaned_data['password_1'])
-        new_user.first_name = self.cleaned_data['first_name']
-        new_user.last_name = self.cleaned_data['last_name']
-        new_user.save()
-        profile = Profile(user=new_user,
-                          organization=self.cleaned_data['organization'],
-                          billing_address=self.cleaned_data['billing_address'],
-                          city=self.cleaned_data['city'],
-                          state=self.cleaned_data['state'],
-                          zip_code=self.cleaned_data['zip_code'],
-                          phone_number=self.cleaned_data['phone_number'])
-        profile.save()
-        return profile
-
-
-
-class UpdateAccountForm(forms.ModelForm):
-    class Meta:
-        model  = Profile
-        fields = ['organization', 'billing_address', 'city', 'state',
-                  'zip_code', 'phone_number', 'email_verified', 'rep_verified',]
-
-    def save(self, pk):
-        profile = get_object_or_404(Profile, pk=pk)
-        # get all the new invoices if newly approved
-        if not profile.rep_verified and self.cleaned_data['rep_verified']:
-            pass
-            # pull new stuff here
-
+    def save(self, profile):
         # update info
-        profile.organization = self.cleaned_data['organization']
-        profile.billing_address = self.cleaned_data['billing_address']
-        profile.city = self.cleaned_data['city']
-        profile.state = self.cleaned_data['state']
-        profile.zip_code = self.cleaned_data['zip_code']
-        profile.email_verified = self.cleaned_data['email_verified']
-        profile.rep_verified = self.cleaned_data['rep_verified']
+        user = profile.user
+        user.username = self.cleaned_data['username']
+        user.set_password(self.cleaned_data['password_1'])
+        user.save()
 
+        profile.activated = True
         profile.save()
+
         return profile

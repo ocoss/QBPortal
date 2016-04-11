@@ -3,7 +3,21 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from client_portal.forms import NewAccountForm
+from client_portal.models import Profile
+
+from client_portal.forms import ActivateAccountForm
+
+
+
+class ClientBaseView(LoginRequiredMixin, TemplateView):
+    staff_redirect = 'front_page'
+    
+    def dispatch(self, request, *args, **kwargs):
+        if hasattr(request.user, 'staffmember'):
+            return redirect(self.staff_redirect)
+        if hasattr(request.user, 'profile') and not request.user.profile.activated:
+            return redirect('activate_account')
+        return super(ClientBaseView, self).dispatch(request, *args, **kwargs)
 
 
 
@@ -12,70 +26,57 @@ class FrontPageView(TemplateView):
 
 
 
-class OrdersView(LoginRequiredMixin, TemplateView):
+class OrdersView(ClientBaseView):
     template_name = 'client_portal/orders.html'
+    staff_redirect = 'staff_orders'
     
     def get_context_data(self, **kwargs):
         context = super(OrdersView, self).get_context_data(**kwargs)
         return context
 
-    def dispatch(self, request, *args, **kwargs):
-        # redirect to staff page if staff member
-        if hasattr(request.user, 'staffmember'):
-            return redirect('staff_orders')
-        return super(OrdersView, self).dispatch(request, *args, **kwargs)
 
 
-
-class ReportsView(LoginRequiredMixin, TemplateView):
+class ReportsView(ClientBaseView):
     template_name = 'client_portal/reports.html'
+    staff_redirect = 'staff_reports'
     
     def get_context_data(self, **kwargs):
         context = super(ReportsView, self).get_context_data(**kwargs)
         return context
 
-    def dispatch(self, request, *args, **kwargs):
-        # redirect to staff page if staff member
-        if hasattr(request.user, 'staffmember'):
-            return redirect('staff_reports')
-        return super(ReportsView, self).dispatch(request, *args, **kwargs)
 
 
-
-class SettingsView(LoginRequiredMixin, TemplateView):
+class SettingsView(ClientBaseView):
     template_name = 'client_portal/settings.html'
+    staff_redirect = 'staff_settings'
     
     def get_context_data(self, **kwargs):
         context = super(SettingsView, self).get_context_data(**kwargs)
         return context
 
-    def dispatch(self, request, *args, **kwargs):
-        # redirect to staff page if staff member
-        if hasattr(request.user, 'staffmember'):
-            return redirect('staff_settings')
-        return super(SettingsView, self).dispatch(request, *args, **kwargs)
 
 
-
-class NewAccountView(TemplateView):
-    template_name = 'client_portal/create_account.html'
+class ActivateAccountView(ClientBaseView):
+    template_name = 'client_portal/activate_account.html'
 
     def get_context_data(self, **kwargs):
-        context = super(NewAccountView, self).get_context_data(**kwargs)
-        context['form'] = NewAccountForm()
+        context = super(ActivateAccountView, self).get_context_data(**kwargs)
+        context['form'] = ActivateAccountForm()
         return context
 
     def post(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        form = NewAccountForm(request.POST)
+        form = ActivateAccountForm(request.POST)
         if form.is_valid():
-            form.save()
+            form.save(request.user.profile)
             return redirect('orders')
         context['form'] = form
         return render(request, self.template_name, context)
 
     def dispatch(self, request, *args, **kwargs):
-        # check if already logged in
-        if request.user.is_authenticated():
+        # check if already active
+        if request.user.profile.activated:
             return redirect('front_page')
-        return super(NewAccountView, self).dispatch(request, *args, **kwargs)
+        if hasattr(request.user, 'staffmember'):
+            return redirect('front_page')
+        return super(LoginRequiredMixin, self).dispatch(request, *args, **kwargs)

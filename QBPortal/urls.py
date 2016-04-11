@@ -1,5 +1,5 @@
-from django.conf.urls import url, include
 from django.contrib import admin
+from django.conf.urls import url, include
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
@@ -17,7 +17,7 @@ urlpatterns = [
 
     url(r'', include('client_portal.urls')),
     url(r'staff/', include('staff_portal.urls')),
-    url(r'tools/', include('tools.urls')),
+    # url(r'tools/', include('tools.urls')),
     
     url(r'^admin/', admin.site.urls),
 ]

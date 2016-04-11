@@ -5,15 +5,17 @@
 {% endblock %}
 {% block extra_settings %}
     
-    <h3>Clients (* is not verified)</h3>
+    <h3>Clients (* is not active)</h3>
     {% for client in clients %}
         <p>
-        {% if not client.rep_verified %}
+        {% if not client.activated %}
             (*)
         {% endif %}
-            <a href={% url 'staff_update_account' pk=client.pk %}>{{ client }}</a>
+            {{ client }}
         </p>
     {% endfor %}
+
+    <p><a href={% url 'staff_create_account' %}>Create client account</a></p>
 
     <h3>Admin Settings</h3>
     {% if user.is_superuser %}

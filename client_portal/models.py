@@ -1,64 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
+
 from staff_portal.models import StaffMember
 
 
 
 class Profile(models.Model):
-    STATE_ABREVIATIONS = (
-    ('AL', 'AL'),
-    ('AK', 'AK'),
-    ('AZ', 'AZ'),
-    ('AR', 'AR'),
-    ('CA', 'CA'),
-    ('CO', 'CO'),
-    ('CT', 'CT'),
-    ('DE', 'DE'),
-    ('DC', 'DC'),
-    ('FL', 'FL'),
-    ('GA', 'GA'),
-    ('HI', 'HI'),
-    ('ID', 'ID'),
-    ('IL', 'IL'),
-    ('IN', 'IN'),
-    ('IA', 'IA'),
-    ('KS', 'KS'),
-    ('KY', 'KY'),
-    ('LA', 'LA'),
-    ('ME', 'ME'),
-    ('MD', 'MD'),
-    ('MA', 'MA'),
-    ('MI', 'MI'),
-    ('MN', 'MN'),
-    ('MS', 'MS'),
-    ('MO', 'MO'),
-    ('MT', 'MT'),
-    ('NE', 'NE'),
-    ('NV', 'NV'),
-    ('NH', 'NH'),
-    ('NJ', 'NJ'),
-    ('NM', 'NM'),
-    ('NY', 'NY'),
-    ('NC', 'NC'),
-    ('ND', 'ND'),
-    ('OH', 'OH'),
-    ('OK', 'OK'),
-    ('OR', 'OR'),
-    ('PA', 'PA'),
-    ('RI', 'RI'),
-    ('SC', 'SC'),
-    ('SD', 'SD'),
-    ('TN', 'TN'),
-    ('TX', 'TX'),
-    ('UT', 'UT'),
-    ('VT', 'VT'),
-    ('VA', 'VA'),
-    ('WA', 'WA'),
-    ('WV', 'WV'),
-    ('WI', 'WI'),
-    ('WY', 'WY'),
-)
-
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     # user has the following fields:
     # - username
@@ -73,37 +20,29 @@ class Profile(models.Model):
     # - is_superuser
     # - last_login
     # - date_joined
-    # (* optional; Make required in forms)
-    
+    # (* = optional)
+
     # additional info goes here
-    organization = models.CharField(max_length=200)
-    billing_address = models.CharField(max_length=100)
-    city = models.CharField(max_length=50)
-    state = models.CharField(max_length=2, choices=STATE_ABREVIATIONS)
-    zip_code = models.CharField(max_length = 15)
+    order_name = models.CharField(max_length=200)
+    activated = models.BooleanField(default=False)
 
-    phone_number = models.CharField(max_length=20)
 
-    email_verified = models.BooleanField(default=False)
-    rep_verified = models.BooleanField(default=False)
-    
     class Meta():
         ordering = ['user__last_name', 'user__first_name']
 
     def __unicode__(self):
-        return "{} {}: {}".format(self.user.first_name, self.user.last_name,
-                                  self.organization)
-    
+        return self.order_name
+
     def __str__(self):
-        return "{} {}: {}".format(self.user.first_name, self.user.last_name,
-                                  self.organization)
+        return self.order_name
 
 
 
 class Order(models.Model):
     # people associated with this order
     client = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    rep = models.ForeignKey(StaffMember, on_delete=models.SET_NULL, null=True)
+    rep = models.ForeignKey(StaffMember, on_delete=models.SET_NULL, null=True,
+                            blank=True)
 
     # when the order/estimate was created
     date = models.DateField()
@@ -113,7 +52,7 @@ class Order(models.Model):
     is_invoiced = models.BooleanField(default=False)
 
     # need to figure out how to store this
-    items = models.CharField(max_length=100)
+    items = models.CharField(max_length=1000)
 
     # the total cost of the order
     total_amount = models.DecimalField(max_digits=8, decimal_places=2)
@@ -121,7 +60,8 @@ class Order(models.Model):
     total_owed = models.DecimalField(max_digits=8, decimal_places=2)
     # if total_owed is zero
     payed_off = models.BooleanField(default=False)
-    
+
+
     class Meta():
         ordering = ['date']
 
@@ -132,5 +72,6 @@ class Payment(models.Model):
     amount = models.DecimalField(max_digits=8, decimal_places=2)
     date = models.DateField()
 
+
     class Meta():
-        ordering = ['date']
+        ordering = ['order', 'date']

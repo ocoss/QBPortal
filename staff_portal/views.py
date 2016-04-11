@@ -1,100 +1,88 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, redirect
 
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from staff_portal.forms import NewStaffForm
-from client_portal.forms import UpdateAccountForm
+from staff_portal.forms import NewStaffAccountForm
+from client_portal.forms import NewClientAccountForm
 from client_portal.models import Profile
+
+
+
+class StaffBaseView(LoginRequiredMixin, TemplateView):
+    client_redirect = 'front_page'
+
+    def dispatch(self, request, *args, **kwargs):
+        # redirect to client page if not a staff member
+        if not hasattr(request.user, 'staffmember'):
+            return redirect(self.client_redirect)
+        return super(StaffBaseView, self).dispatch(request, *args, **kwargs)
 
 
 
 class StaffOrdersView(LoginRequiredMixin, TemplateView):
     template_name = 'staff_portal/staff_orders.html'
+    client_redirect = 'orders'
     
     def get_context_data(self, **kwargs):
         context = super(StaffOrdersView, self).get_context_data(**kwargs)
         return context
 
-    def dispatch(self, request, *args, **kwargs):
-        # redirect to client page if not staff member
-        if not hasattr(request.user, 'staffmember'):
-            return redirect('orders')
-        return super(StaffOrdersView, self).dispatch(request, *args, **kwargs)
-
 
 
 class StaffReportsView(LoginRequiredMixin, TemplateView):
     template_name = 'staff_portal/staff_reports.html'
+    client_redirect = 'reports'
     
     def get_context_data(self, **kwargs):
         context = super(StaffReportsView, self).get_context_data(**kwargs)
         return context
 
-    def dispatch(self, request, *args, **kwargs):
-        # redirect to client page if not staff member
-        if not hasattr(request.user, 'staffmember'):
-            return redirect('reports')
-        return super(StaffReportsView, self).dispatch(request, *args, **kwargs)
-
 
 
 class StaffSettingsView(LoginRequiredMixin, TemplateView):
     template_name = 'staff_portal/staff_settings.html'
+    client_redirect = 'settings'
     
     def get_context_data(self, **kwargs):
         context = super(StaffSettingsView, self).get_context_data(**kwargs)
         context['clients'] = Profile.objects.all()
         return context
 
-    def dispatch(self, request, *args, **kwargs):
-        # redirect to client page if not staff member
-        if not hasattr(request.user, 'staffmember'):
-            return redirect('settings')
-        return super(StaffSettingsView, self).dispatch(request, *args, **kwargs)
 
 
-
-class StaffUpdateView(LoginRequiredMixin, TemplateView):
-    template_name = 'staff_portal/staff_update_account.html'
+class StaffCreateAccountView(LoginRequiredMixin, TemplateView):
+    template_name = 'staff_portal/staff_create_account.html'
+    client_redirect = 'settings'
 
     def get_context_data(self, **kwargs):
-        context = super(StaffUpdateView, self).get_context_data(**kwargs)
-        client_pk = self.kwargs['pk']
-        context['pk'] = client_pk
-        profile = get_object_or_404(Profile, pk=client_pk)
-        context['client'] = profile
-        context['form'] = UpdateAccountForm(instance=profile)
+        context = super(StaffCreateAccountView, self).get_context_data(**kwargs)
+        context['form'] = NewClientAccountForm()
         return context
 
     def post(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        form = UpdateAccountForm(request.POST)
+        form = NewClientAccountForm(request.POST)
         if form.is_valid():
-            form.save(kwargs['pk'])
+            form.save()
             return redirect('staff_settings')
         context['form'] = form
         return render(request, self.template_name, context)
-
-    def dispatch(self, request, *args, **kwargs):
-        # redirect to client page if not staff member
-        if not hasattr(request.user, 'staffmember'):
-            return redirect('settings')
-        return super(StaffUpdateView, self).dispatch(request, *args, **kwargs)
 
 
 
 class CreateStaffView(LoginRequiredMixin, TemplateView):
     template_name = 'staff_portal/create_staff.html'
+    client_redirect = 'settings'
 
     def get_context_data(self, **kwargs):
         context = super(CreateStaffView, self).get_context_data(**kwargs)
-        context['form'] = NewStaffForm()
+        context['form'] = NewStaffAccountForm()
         return context
 
     def post(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        form = NewStaffForm(request.POST)
+        form = NewStaffAccountForm(request.POST)
         if form.is_valid():
             form.save()
             return redirect('staff_settings')

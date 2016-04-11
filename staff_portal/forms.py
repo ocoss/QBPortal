@@ -1,14 +1,12 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
-from django.contrib.auth.models import Permission
-from django.contrib.contenttypes.models import ContentType
 
 from staff_portal.models import StaffMember
-from client_portal.models import Profile
 
 
-class NewStaffForm(forms.ModelForm):
+
+class NewStaffAccountForm(forms.ModelForm):
     class Meta:
         model = StaffMember
         fields = ['qb_code',]
