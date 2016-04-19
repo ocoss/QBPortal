@@ -51,23 +51,23 @@ class StaffSettingsView(LoginRequiredMixin, TemplateView):
 
 
 
-class StaffCreateAccountView(LoginRequiredMixin, TemplateView):
-    template_name = 'staff_portal/staff_create_account.html'
-    client_redirect = 'settings'
+# class StaffCreateAccountView(LoginRequiredMixin, TemplateView):
+#     template_name = 'staff_portal/staff_create_account.html'
+#     client_redirect = 'settings'
 
-    def get_context_data(self, **kwargs):
-        context = super(StaffCreateAccountView, self).get_context_data(**kwargs)
-        context['form'] = NewClientAccountForm()
-        return context
+#     def get_context_data(self, **kwargs):
+#         context = super(StaffCreateAccountView, self).get_context_data(**kwargs)
+#         context['form'] = NewClientAccountForm()
+#         return context
 
-    def post(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
-        form = NewClientAccountForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('staff_settings')
-        context['form'] = form
-        return render(request, self.template_name, context)
+#     def post(self, request, *args, **kwargs):
+#         context = self.get_context_data(**kwargs)
+#         form = NewClientAccountForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('staff_settings')
+#         context['form'] = form
+#         return render(request, self.template_name, context)
 
 
 

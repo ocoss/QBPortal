@@ -8,7 +8,7 @@ from client_portal.models import Profile
 class NewClientAccountForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['order_name',]
+        fields = ['display_name',]
 
     email = forms.EmailField()
 
@@ -32,7 +32,7 @@ class NewClientAccountForm(forms.ModelForm):
         new_user.save()
         
         profile = Profile(user=new_user, activated=False,
-                          order_name=self.cleaned_data['order_name'])
+                          display_name=self.cleaned_data['order_name'])
         profile.save()
         return profile
 

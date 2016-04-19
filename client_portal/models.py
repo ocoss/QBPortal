@@ -23,18 +23,18 @@ class Profile(models.Model):
     # (* = optional)
 
     # additional info goes here
-    order_name = models.CharField(max_length=200)
+    display_name = models.CharField(max_length=200)
     activated = models.BooleanField(default=False)
 
 
     class Meta():
-        ordering = ['user__last_name', 'user__first_name']
+        ordering = ['user__email', 'display_name',]
 
     def __unicode__(self):
-        return self.order_name
+        return self.display_name
 
     def __str__(self):
-        return self.order_name
+        return self.display_name
 
 
 
