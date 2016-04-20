@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 
 from staff_portal.models import StaffMember
@@ -25,10 +26,20 @@ class Profile(models.Model):
     # additional info goes here
     display_name = models.CharField(max_length=200)
     activated = models.BooleanField(default=False)
+    email_pref = models.BooleanField(default=True)
 
 
     class Meta():
-        ordering = ['user__email', 'display_name',]
+        ordering = ['display_name', 'user__email',]
+
+    def validate_unique(self, *args, **kwargs):
+        if Profile.objects.filter(user__email=self.user.email).exists():
+            raise ValidationError({'name':['Email must be unique per Profile',]})
+        return super(Profile, self).validate_unique(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        self.validate_unique()
+        return super(Profile, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return self.display_name
@@ -40,9 +51,8 @@ class Profile(models.Model):
 
 class Order(models.Model):
     # people associated with this order
-    client = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    rep = models.ForeignKey(StaffMember, on_delete=models.SET_NULL, null=True,
-                            blank=True)
+    client = models.ManyToManyField(Profile)
+    rep_code = models.CharField(max_length=20)
 
     # when the order/estimate was created
     date = models.DateField()

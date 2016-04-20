@@ -31,41 +31,55 @@ class PopulateDBView(LoginRequiredMixin, TemplateView):
                                 company_id=QB['REALM_ID']
                                 )
 
-
-        customers = Customer.all()
-        new_accounts = []
-
-        for customer in customers:
-
-            # check if the account already exists
-            if Profile.objects.filter(display_name=customer.DisplayName):
-                continue
-
-            # create a new profile
-            try:
-                # genereate a unique random username
-                while True:
-                    username = User.objects.make_random_password(length=6)
-                    User.objects.get(username=username)
-            except User.DoesNotExist:
-                pass
-
-            # generate a random password
-            password = User.objects.make_random_password()
-
-            # create a new, inactive user profile
-            new_user = User.objects.create_user(username)
-            if customer.PrimaryEmailAddr:
-                new_user.email = str(customer.PrimaryEmailAddr)
-            new_user.set_password(password)
-            new_user.save()
+        count = 1
+        while True:
+            # grab all the customers in chunks of 1000 (largest size allowed)
+            customers = Customer.filter(start_position=count, max_results=1000)
             
-            profile = Profile(user=new_user, activated=False,
-                              display_name=customer.DisplayName)
-            profile.save()
+            # update position
+            count += len(customers)
+            if len(customers) == 0:
+                break
 
-            new_accounts.append("{}: {} ({} {})".format(customer.DisplayName,
-                                 str(customer.PrimaryEmailAddr), username, password))
+            # iterate through accounts
+            for customer in customers:
+                # make sure the account has all the neccessary info
+                if not customer.PrimaryEmailAddr or not customer.DisplayName:
+                    continue
+
+                # make an account for every email address listed
+                for email in str(customer.PrimaryEmailAddr).split(','):
+                    email = email.strip()
+
+                    # make sure email exists
+                    if not email:
+                        continue
+
+                    # make sure the email is unique
+                    if Profile.objects.filter(user__email=email).exists():
+                        continue
+
+                    # create a new profile
+                    try:
+                        # genereate a unique random username
+                        while True:
+                            username = User.objects.make_random_password(length=6)
+                            User.objects.get(username=username)
+                    except User.DoesNotExist:
+                        pass
+
+                    # generate a random password
+                    password = User.objects.make_random_password()
+
+                    # create a new, inactive user profile
+                    new_user = User.objects.create_user(username)
+                    new_user.email = email
+                    new_user.set_password(password)
+                    new_user.save()
+                    
+                    profile = Profile(user=new_user, activated=False, email_pref=True,
+                                      display_name=customer.DisplayName)
+                    profile.save()
 
         # # get all info from api in lists of objects
         # invoices = Invoice.all(max_results=1000)
@@ -119,7 +133,6 @@ class PopulateDBView(LoginRequiredMixin, TemplateView):
         #     # convert to custom django model
         #     order = Order(client=profile, rep=rep)
 
-        context['new_accounts'] = new_accounts
         return context
 
     def dispatch(self, request, *args, **kwargs):
