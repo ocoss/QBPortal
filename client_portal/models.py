@@ -50,6 +50,9 @@ class Profile(models.Model):
 
 
 class Order(models.Model):
+    # for internal purposes
+    id_num = models.IntegerField()
+
     # people associated with this order
     client = models.ManyToManyField(Profile)
     rep_code = models.CharField(max_length=20)
@@ -61,8 +64,8 @@ class Order(models.Model):
     is_estimate = models.BooleanField(default=True)
     is_invoiced = models.BooleanField(default=False)
 
-    # need to figure out how to store this
-    items = models.CharField(max_length=1000)
+    # all the text in qb about items
+    items = models.TextField()
 
     # the total cost of the order
     total_amount = models.DecimalField(max_digits=8, decimal_places=2)

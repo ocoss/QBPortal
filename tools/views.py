@@ -31,6 +31,8 @@ class PopulateDBView(LoginRequiredMixin, TemplateView):
                                 company_id=QB['REALM_ID']
                                 )
 
+
+        # Customers-------------------------------------------------------------
         count = 1
         while True:
             # grab all the customers in chunks of 1000 (largest size allowed)
@@ -77,61 +79,60 @@ class PopulateDBView(LoginRequiredMixin, TemplateView):
                     new_user.set_password(password)
                     new_user.save()
                     
-                    profile = Profile(user=new_user, activated=False, email_pref=True,
+                    profile = Profile(user=new_user, activated=False,
+                                      email_pref=True,
                                       display_name=customer.DisplayName)
                     profile.save()
 
-        # # get all info from api in lists of objects
-        # invoices = Invoice.all(max_results=1000)
 
-        # # create orders from invoice info
-        # for invoice in invoices:
-        #     # parse user info
-        #     # should be {name/org}, {city}, {state (2 letter)}
-        #     # but some are missing second comma :(
-        #     user_info = invoice.CustomerRef.name.split(',')
+        # Invoices--------------------------------------------------------------
 
-        #     # handle missing comma case
-        #     if len(user_info) == 2:
-        #         city_state = user_info[1].strip()
-        #         user_info[1] = city_state[:-3].strip()
-        #         user_info.append(city_state[-2:])
+        count = 1
+        while True:
+            # get all invoices in chunks of 1000 (largesst size allowed)
+            invoices = Invoice.all(start_position=count, max_results=2)
 
-        #     # try to find associated user profile
-        #     name = user_info[0].split()
+            # update position
+            count += len(invoices)
+            if len(invoices) == 0:
+                break
+
+            # create orders from invoice info
+            for invoice in invoices:
+
+                # get associated rep code
+                rep_code = ''
+                for cf in invoice.CustomField:
+                    if cf.Name == "SALES REP":
+                        rep_code = cf.StringValue.strip()
+
+                items = ''
+                for line in invoice.Line:
+                    items += line
+
+                order = Order(id_num=invoice.ID, rep_code=rep_code, 
+                              date=invoice.DueDate, is_estimate=False,
+                              is_invoice=True, items=items,
+                              total_amount=invoice.TotalAmt,
+                              total_owed=invoice.TotalAmt)
+                order.save()
+
+                # These are all the id's of the estimates
+                # for l in invoice.LinkedTxn:
+                #     l
+
+                # get associated email addresses
+                emails = str(invoice.BillEmail).split(',')
+                for email in emails:
+                    email = email.strip()
+                    try:
+                        profile = User.objects.get(email=email).profile
+                        order.client.add(profile)
+                    except ObjectDoesNotExist:
+                        pass
             
-        #     if len(name) == 2:
-        #         # could be person's name
-        #         try:
-        #             profile = Profile.objects.get(user__first_name=name[0].strip(), user__last_name=name[1].strip(), city=user_info[1].strip(), state=user_info[2].strip())
+            break
 
-        #         # user does not have an online profile
-        #         except ObjectDoesNotExist:
-        #             pass
-
-        #     # could be org name
-        #     try:
-        #         profile = Profile.objects.get(org_name=user_info[0].strip(), city=user_info[1].strip(), state=user_info[2].strip())
-
-        #     # org does not have an online profile
-        #     except ObjectDoesNotExist:
-        #         profile = None
-
-        #     # try to find associated rep
-        #     for cf in invoice.CustomField:
-        #         if cf.Name == "SALES REP":
-        #             rep_code = cf.StringValue.strip()
-        #             try:
-        #                 rep = StaffMember.objects.get(qb_code=rep_code)
-        #             except ObjectDoesNotExist:
-        #                 rep = None
-        #             break
-        #     else:
-        #         rep = None
-            
-
-        #     # convert to custom django model
-        #     order = Order(client=profile, rep=rep)
 
         return context
 
